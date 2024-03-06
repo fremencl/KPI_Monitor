@@ -13,6 +13,7 @@ DATA0_URL = 'https://streamlitmaps.s3.amazonaws.com/data_orders.csv'
 def load_data0():
     # Carga el archivo CSV, decodificando y usando ";" como separador
     data0 = pd.read_csv(DATA0_URL, encoding='ISO-8859-1', sep=';')
+    
     # Mapeo de 'Sociedad CO' a 'Soc_Map'
     soc_map = {
         1000: 'AA',
@@ -21,8 +22,16 @@ def load_data0():
         3000: 'AM',
         3100: 'AM',
     }
-    # Aplica el mapeo a la columna 'Sociedad CO'
     data0['Soc_Map'] = data0['Sociedad CO'].map(soc_map)
+    
+    # Mapeo de 'Clase de orden' a 'Tipo_Orden'
+    tipo_map = {
+        'PM01': 'Correctiva',
+        'PM02': 'Correctiva',
+        'PM03': 'Preventiva',
+    }
+    data0['Tipo_Orden'] = data0['Clase de orden'].map(tipo_map)
+    
     return data0
         
 # Cargamos el archivo de referencia
@@ -35,23 +44,28 @@ with st.sidebar:
     opciones_sociedad = ['Todas'] + list(data0['Soc_Map'].unique())
     opcion = st.selectbox('Sociedad', opciones_sociedad)
 
-# Filtrar data0 según la selección de Sociedad
 if opcion != 'Todas':
     data_filtrada = data0[data0['Soc_Map'] == opcion]
 else:
     data_filtrada = data0
 
-# Cálculo de la cantidad de órdenes
-Cantidad_ordenes = len(data_filtrada['Orden'].unique())
+# Conteo de órdenes correctivas y preventivas
+Cantidad_ordenes_correctivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Correctiva']['Orden'].unique())
+Cantidad_ordenes_preventivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Preventiva']['Orden'].unique())
 
-# Visualización del filtro y la métrica
+# Visualización del filtro y la métrica general de órdenes
 st.write('Sociedad:', opcion)
 
 # Definición de las columnas
 col1, col2 = st.columns((1, 1))
 
-# Uso del widget Metric de Streamlit para mostrar la cantidad de órdenes
-col1.metric(label="Órdenes", value=Cantidad_ordenes)
+with col1:
+    # Uso del widget Metric de Streamlit para mostrar la cantidad total de órdenes
+    st.metric(label="Total Órdenes", value=Cantidad_ordenes)
+    
+    # Uso de widgets Metric adicionales para mostrar las cantidades de órdenes correctivas y preventivas
+    st.metric(label="Órdenes Correctivas", value=Cantidad_ordenes_correctivas)
+    st.metric(label="Órdenes Preventivas", value=Cantidad_ordenes_preventivas)
 
 # Ahora implementamos el gráfico en la segunda columna
 with col2:
