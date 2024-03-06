@@ -1,6 +1,7 @@
 # Importación de librerías
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # Título de la aplicación
 st.title('MONITOR GESTION DEL MANTENIMIENTO')
@@ -51,5 +52,17 @@ col1, col2 = st.columns((1, 1))
 
 # Uso del widget Metric de Streamlit para mostrar la cantidad de órdenes
 col1.metric(label="Órdenes", value=Cantidad_ordenes)
-# El código para la gráfica se definirá en una etapa posterior
-# col2(Gráfica por definir)
+
+# Ahora implementamos el gráfico en la segunda columna
+with col2:
+    # Preparación de los datos para el gráfico. Este paso agrupa los datos por 'Soc_Map' y cuenta las órdenes
+    data_grafico = data0.groupby('Soc_Map')['Orden'].nunique().reset_index().rename(columns={'Orden': 'Cantidad_Ordenes'})
+    
+    # Creación del gráfico de barras con Plotly Express
+    fig = px.bar(data_grafico, x='Soc_Map', y='Cantidad_Ordenes', title="Cantidad de Órdenes por Sociedad", labels={'Soc_Map': 'Sociedad', 'Cantidad_Ordenes': 'Cantidad de Órdenes'})
+    
+    # Ajustes de estilo adicionales, si es necesario
+    fig.update_layout(xaxis_title="Sociedad", yaxis_title="Cantidad de Órdenes")
+    
+    # Mostrar el gráfico en la aplicación Streamlit
+    st.plotly_chart(fig, use_container_width=True)
