@@ -42,6 +42,9 @@ def load_data0():
             return 'Distribución'
     
     data0['Proceso'] = data0['Ubicac.técnica'].apply(mapeo_proceso)
+
+    # Conversión de 'Cst.tot.reales' a numérico, tratando errores
+    data0['Cst.tot.reales'] = pd.to_numeric(data0['Cst.tot.reales'], errors='coerce').fillna(0).astype(int)
     
     return data0
         
@@ -69,6 +72,9 @@ else:
 if opcion_proceso != 'Todos':
     data_filtrada = data_filtrada[data_filtrada['Proceso'] == opcion_proceso]
 
+# Sumatoria de 'Cst.tot.reales' después de los filtros
+sumatoria_costo_total = data_filtrada['Cst.tot.reales'].sum()
+
 # Conteo de ordenes correctivas y preventivas
 Cantidad_ordenes_correctivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Correctiva']['Orden'].unique())
 Cantidad_ordenes_preventivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Preventiva']['Orden'].unique())
@@ -86,9 +92,12 @@ with col1:
     # Uso del widget Metric de Streamlit para mostrar la cantidad total de órdenes
     st.metric(label="Total Órdenes", value=Cantidad_ordenes)
     
-    # Uso de widgets Metric adicionales para mostrar las cantidades de órdenes correctivas y preventivas
+    # Widgets Metric adicionales para mostrar las cantidades de órdenes correctivas y preventivas
     st.metric(label="Órdenes Correctivas", value=Cantidad_ordenes_correctivas)
     st.metric(label="Órdenes Preventivas", value=Cantidad_ordenes_preventivas)
+
+    # Widget de métricas para mostrar la sumatoria de 'Cst.tot.reales'
+    st.metric(label="Costo Total Real", value=sumatoria_costo_total)
 
 # Ahora implementamos el gráfico en la segunda columna
 with col2:
