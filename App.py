@@ -21,6 +21,7 @@ def load_data0():
         2000: 'AC',
         3000: 'AM',
         3100: 'AM',
+        6100: 'AA',
     }
     data0['Soc_Map'] = data0['Sociedad CO'].map(soc_map)
     
