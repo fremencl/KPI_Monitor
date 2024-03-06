@@ -97,7 +97,7 @@ with col1:
     st.metric(label="Órdenes Preventivas", value=Cantidad_ordenes_preventivas)
 
     # Widget de métricas para mostrar la sumatoria de 'Cst.tot.reales'
-    st.metric(label="Costo Total Real", value=sumatoria_costo_total)
+    st.metric(label="Costo Total Real", value=f"{sumatoria_costo_total:,}")
 
 # Ahora implementamos el gráfico en la segunda columna
 with col2:
