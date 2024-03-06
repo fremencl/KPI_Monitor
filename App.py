@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.express as px
 
 # Título de la aplicación
-st.title('MONITOR GESTION DEL MANTENIMIENTO')
+st.markdown("<h1 style='text-align: center; color: black; font-size: 24px;'>MONITOR GESTIÓN DEL MANTENIMIENTO</h1>", unsafe_allow_html=True)
 
 # Definimos la URL del archivo de referencia
 DATA0_URL = 'https://streamlitmaps.s3.amazonaws.com/data_orders.csv'
@@ -59,7 +59,12 @@ with col2:
     data_grafico = data0.groupby('Soc_Map')['Orden'].nunique().reset_index().rename(columns={'Orden': 'Cantidad_Ordenes'})
     
     # Creación del gráfico de barras con Plotly Express
-    fig = px.bar(data_grafico, x='Soc_Map', y='Cantidad_Ordenes', title="Cantidad de Órdenes por Sociedad", labels={'Soc_Map': 'Sociedad', 'Cantidad_Ordenes': 'Cantidad de Órdenes'})
+    fig = px.bar(data_grafico, x='Soc_Map', y='Cantidad_Ordenes',
+             title="Cantidad de Órdenes por Sociedad",
+             labels={'Soc_Map': 'Sociedad', 'Cantidad_Ordenes': 'Cantidad de Órdenes'},
+             color='Soc_Map',  # Define la columna que determinará el color de las barras
+             color_discrete_map={'AA':'#636EFA', 'AC':'#EF553B', 'AM':'#00CC96'}  # Personaliza los colores
+            )
     
     # Ajustes de estilo adicionales, si es necesario
     fig.update_layout(xaxis_title="Sociedad", yaxis_title="Cantidad de Órdenes")
