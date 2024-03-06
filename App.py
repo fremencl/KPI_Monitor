@@ -53,6 +53,9 @@ else:
 Cantidad_ordenes_correctivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Correctiva']['Orden'].unique())
 Cantidad_ordenes_preventivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Preventiva']['Orden'].unique())
 
+# Cálculo cantidad de ordenes totales
+Cantidad_ordenes = len(data_filtrada['Orden'].unique())
+
 # Visualización del filtro y la métrica general de órdenes
 st.write('Sociedad:', opcion)
 
