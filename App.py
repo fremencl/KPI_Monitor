@@ -31,6 +31,17 @@ def load_data0():
         'PM03': 'Preventiva',
     }
     data0['Tipo_Orden'] = data0['Clase de orden'].map(tipo_map)
+
+    # Mapeo de 'Ubicac.técnica' a 'Proceso'
+    def mapeo_proceso(ubicacion):
+        if ubicacion.startswith('A-TRAT'):
+            return 'Producción'
+        elif ubicacion.startswith('A-DEPU'):
+            return 'Depuración'
+        else:
+            return 'Distribución'
+    
+    data0['Proceso'] = data0['Ubicac.técnica'].apply(mapeo_proceso)
     
     return data0
         
@@ -44,12 +55,21 @@ with st.sidebar:
     opciones_sociedad = ['Todas'] + list(data0['Soc_Map'].unique())
     opcion = st.selectbox('Sociedad', opciones_sociedad)
 
+    # Agregamos el filtro de Proceso
+    opciones_proceso = ['Todos'] + sorted(data0['Proceso'].unique())
+    opcion_proceso = st.sidebar.selectbox('Proceso', opciones_proceso)
+
+# Filtrado basado en Sociedad
 if opcion != 'Todas':
     data_filtrada = data0[data0['Soc_Map'] == opcion]
 else:
     data_filtrada = data0
 
-# Conteo de órdenes correctivas y preventivas
+# Filtrado adicional basado en Proceso
+if opcion_proceso != 'Todos':
+    data_filtrada = data_filtrada[data_filtrada['Proceso'] == opcion_proceso]
+
+# Conteo de ordenes correctivas y preventivas
 Cantidad_ordenes_correctivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Correctiva']['Orden'].unique())
 Cantidad_ordenes_preventivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Preventiva']['Orden'].unique())
 
