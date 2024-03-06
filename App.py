@@ -33,6 +33,9 @@ def load_data0():
     }
     data0['Tipo_Orden'] = data0['Clase de orden'].map(tipo_map)
 
+    # Conversión de 'Ubicac.técnica' a string antes de aplicar el mapeo
+    data0['Ubicac.técnica'] = data0['Ubicac.técnica'].astype(str)
+    
     # Mapeo de 'Ubicac.técnica' a 'Proceso'
     def mapeo_proceso(ubicacion):
         if ubicacion.startswith('A-TRAT'):
