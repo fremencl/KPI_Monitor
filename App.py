@@ -2,17 +2,28 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import numpy as np
+from datetime import datetime, timedelta
 
 # Título de la aplicación
 st.markdown("<h1 style='text-align: center; color: black; font-size: 24px;'>MONITOR GESTIÓN DEL MANTENIMIENTO</h1>", unsafe_allow_html=True)
 
 # Definimos la URL del archivo de referencia
 DATA0_URL = 'https://streamlitmaps.s3.amazonaws.com/data_orders.csv'
+# Función auxiliar para convertir fechas de Excel a Python
+def excel_date(date1):
+    return datetime(1899, 12, 30) + timedelta(days=date1)
 
 # Función para cargar el archivo de referencia
 def load_data0():
     # Carga el archivo CSV, decodificando y usando ";" como separador
     data0 = pd.read_csv(DATA0_URL, encoding='ISO-8859-1', sep=';')
+    
+    # Convierte la columna 'Fe.inic.extrema' de formato Excel a fecha
+    data0['Fe.inic.extrema'] = pd.to_datetime(data0['Fe.inic.extrema'].apply(excel_date))
+    
+    # Extrae mes y año para cada fila
+    data0['Mes_Año'] = data0['Fe.inic.extrema'].dt.to_period('M')
     
     # Mapeo de 'Sociedad CO' a 'Soc_Map'
     soc_map = {
@@ -113,3 +124,23 @@ with col2:
 
     # Mostrar el gráfico en la aplicación Streamlit
     st.plotly_chart(fig, use_container_width=True)
+
+# Agregamos nuevo contenedor
+st.markdown("<h2 style='text-align: center; color: black; font-size: 20px;'>Evolución Mensual del Costo Total Real</h2>", unsafe_allow_html=True)
+
+# Preparación de datos para el gráfico de líneas
+data_linea = data_filtrada.groupby('Mes_Año')['Cst.tot.reales'].sum().reset_index()
+data_linea['Mes_Año'] = data_linea['Mes_Año'].astype(str)  # Convertimos a string para facilitar la visualización
+
+# Creación del gráfico de líneas con Plotly Express
+fig_linea = px.line(data_linea, x='Mes_Año', y='Cst.tot.reales',
+             title="Evolución Mensual del Costo Total Real",
+             labels={'Mes_Año': 'Mes/Año', 'Cst.tot.reales': 'Costo Total Real'},
+             markers=True  # Agrega marcadores a cada punto de datos
+            )
+
+# Ajustes de estilo adicionales al gráfico
+fig_linea.update_layout(xaxis_title="Mes/Año", yaxis_title="Costo Total Real", xaxis={'type': 'category'})
+
+# Mostrar el gráfico en la aplicación Streamlit
+st.plotly_chart(fig_linea, use_container_width=True)
