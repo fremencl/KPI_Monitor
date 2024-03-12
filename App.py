@@ -76,15 +76,8 @@ else:
 if opcion_proceso != 'Todos':
     data_filtrada = data_filtrada[data_filtrada['Proceso'] == opcion_proceso]
 
-# Sumatoria de 'Cst.tot.reales' después de los filtros
-sumatoria_costo_total = data_filtrada['Cst.tot.reales'].sum()
-
-# Conteo de ordenes correctivas y preventivas
-Cantidad_ordenes_correctivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Correctiva']['Orden'].unique())
-Cantidad_ordenes_preventivas = len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Preventiva']['Orden'].unique())
-
-# Cálculo cantidad de ordenes totales
-Cantidad_ordenes = len(data_filtrada['Orden'].unique())
+# Conteo de ordenes correctivas y preventivas para la gráfica de torta
+ordenes_tipo = data_filtrada['Tipo_Orden'].value_counts().reset_index().rename(columns={'index': 'Tipo', 'Tipo_Orden': 'Cantidad'})
 
 # Visualización del filtro y la métrica general de órdenes
 st.write('Sociedad:', opcion)
@@ -94,30 +87,23 @@ col1, col2 = st.columns((1, 1))
 
 with col1:
     # Uso del widget Metric de Streamlit para mostrar la cantidad total de órdenes
-    st.metric(label="Total Órdenes", value=Cantidad_ordenes)
+    st.metric(label="Total Órdenes", value=len(data_filtrada['Orden'].unique()))
     
     # Widgets Metric adicionales para mostrar las cantidades de órdenes correctivas y preventivas
-    st.metric(label="Órdenes Correctivas", value=Cantidad_ordenes_correctivas)
-    st.metric(label="Órdenes Preventivas", value=Cantidad_ordenes_preventivas)
+    st.metric(label="Órdenes Correctivas", value=len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Correctiva']))
+    st.metric(label="Órdenes Preventivas", value=len(data_filtrada[data_filtrada['Tipo_Orden'] == 'Preventiva']))
 
     # Widget de métricas para mostrar la sumatoria de 'Cst.tot.reales'
-    st.metric(label="Costo Total Real", value=f"{sumatoria_costo_total:,}")
+    st.metric(label="Costo Total Real", value=f"{data_filtrada['Cst.tot.reales'].sum():,}")
 
-# Ahora implementamos el gráfico en la segunda columna
+# Implementación de la gráfica de torta en la segunda columna
 with col2:
-    # Preparación de los datos para el gráfico. Este paso agrupa los datos por 'Soc_Map' y cuenta las órdenes
-    data_grafico = data0.groupby('Soc_Map')['Orden'].nunique().reset_index().rename(columns={'Orden': 'Cantidad_Ordenes'})
-    
-    # Creación del gráfico de barras con Plotly Express
-    fig = px.bar(data_grafico, x='Soc_Map', y='Cantidad_Ordenes',
-             title="Cantidad de Órdenes por Sociedad",
-             labels={'Soc_Map': 'Sociedad', 'Cantidad_Ordenes': 'Cantidad de Órdenes'},
-             color='Soc_Map',  # Define la columna que determinará el color de las barras
-             color_discrete_map={'AA':'#636EFA', 'AC':'#EF553B', 'AM':'#00CC96'}  # Personaliza los colores
-            )
+    # Creación de la gráfica de torta con Plotly Express
+    fig = px.pie(ordenes_tipo, names='Tipo', values='Cantidad', title="Proporción de Órdenes Preventivas y Correctivas",
+                 color='Tipo', color_discrete_map={'Correctiva':'#636EFA', 'Preventiva':'#EF553B'})
     
     # Ajustes de estilo adicionales, si es necesario
-    fig.update_layout(xaxis_title="Sociedad", yaxis_title="Cantidad de Órdenes")
+    fig.update_traces(textposition='inside', textinfo='percent+label')
     
     # Mostrar el gráfico en la aplicación Streamlit
     st.plotly_chart(fig, use_container_width=True)
